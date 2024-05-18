@@ -1,19 +1,17 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
-  "root/sockets"
 	"root/config"
 	"root/middlewares"
 	"root/models"
 	routes "root/routers"
+	"root/sockets"
 	"time"
-
-	"github.com/gin-contrib/cors"
-
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -32,16 +30,22 @@ func main() {
 	// con uno stato di uscita 1, che è un codice di errore generico
 	// che indica che il programma è terminato a causa di un errore
 	// Migrazione dei modelli al database
-  db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{})
 
 	r := gin.Default()
 	// set up dei middleware che sono applicati in tutte le route
 	r.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{"https://localhost:8000"},           // PER DEFINIRE IN MANIERA STATICA CHI PUÒ MANDARE REQUEST
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"}, // DEFINISCE I METODI CONSENTITI
-		AllowHeaders:     []string{"Origin"},                       //LA LISTA DEGLI HEADERS ACCETTATI IN INPUT
-		ExposeHeaders:    []string{"Content-Length"},               //LA LISTA DEGLI HEADERS DA MANDARE INDIETRO AMMESSI
-		AllowCredentials: true,                                     // PERMETTE DI INTEGRARE CREDENTIALS NELL'HEADER
+		AllowOrigins: []string{
+			"https://localhost:8000",
+		}, // PER DEFINIRE IN MANIERA STATICA CHI PUÒ MANDARE REQUEST
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"}, // DEFINISCE I METODI CONSENTITI
+		AllowHeaders: []string{
+			"Origin",
+		}, //LA LISTA DEGLI HEADERS ACCETTATI IN INPUT
+		ExposeHeaders: []string{
+			"Content-Length",
+		}, //LA LISTA DEGLI HEADERS DA MANDARE INDIETRO AMMESSI
+		AllowCredentials: true, // PERMETTE DI INTEGRARE CREDENTIALS NELL'HEADER
 		// AllowOriginFunc: func(origin string) bool {
 		// 	return origin == "https://github.com"
 		// }, SERVE SOLO PER IMPLEMENTARE UN CHECK DINAMICO SULLE ORIGIN
@@ -51,9 +55,9 @@ func main() {
 
 	routes.UserRoute(r)
 	routes.StateRoute(r)
-  r.GET("/ws",sockets.WebSocketHandler)
+	r.GET("/ws", sockets.WebSocketHandler)
 
-	port := os.Getenv("PORT_backend")
+	port := os.Getenv("PORT_BACKEND")
 	err = r.Run(":" + port)
 	if err != nil {
 		log.Fatal("Erore nell'avvio del server:", err)
