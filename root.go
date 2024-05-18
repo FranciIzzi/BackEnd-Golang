@@ -16,10 +16,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// func init() {
-//   gin.SetMode(gin.ReleaseMode)
-// }
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
