@@ -21,40 +21,36 @@ func main() {
 	}
 	db, err := config.ConnectDatabase()
 
-	//In Go, nil rappresenta l'assenza di un valore o un "null"
 	if err != nil {
 		log.Fatal("Impossibile connettersi al database:", err)
 	}
-	// log.Fatal(...) combina log.Print(...) per stampare il messaggio
-	// specificato e poi chiama os.Exit(1) per terminare il programma
-	// con uno stato di uscita 1, che è un codice di errore generico
-	// che indica che il programma è terminato a causa di un errore
-	// Migrazione dei modelli al database
 	db.AutoMigrate(&models.User{})
+  db.AutoMigrate(&models.CimiteriModel{})
+  db.AutoMigrate(&models.InumazioniModel{})
 
 	r := gin.Default()
-	// set up dei middleware che sono applicati in tutte le route
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			"https://localhost:8000",
-		}, // PER DEFINIRE IN MANIERA STATICA CHI PUÒ MANDARE REQUEST
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"}, // DEFINISCE I METODI CONSENTITI
+			"http://localhost:8000",
+		},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders: []string{
 			"Origin",
-		}, //LA LISTA DEGLI HEADERS ACCETTATI IN INPUT
+		},
 		ExposeHeaders: []string{
 			"Content-Length",
-		}, //LA LISTA DEGLI HEADERS DA MANDARE INDIETRO AMMESSI
-		AllowCredentials: true, // PERMETTE DI INTEGRARE CREDENTIALS NELL'HEADER
+		},
+		AllowCredentials: true,
 		// AllowOriginFunc: func(origin string) bool {
 		// 	return origin == "https://github.com"
 		// }, SERVE SOLO PER IMPLEMENTARE UN CHECK DINAMICO SULLE ORIGIN
-		MaxAge: 3 * time.Hour, // TEMPO MASSIMO DEDICATI ALLE RICHIESTE "PREFLIGHT"
+		MaxAge: 3 * time.Hour,
 	}))
 	r.Use(middlewares.AllowedHostsMiddleware())
 
 	routes.UserRoute(r)
 	routes.StateRoute(r)
+  routes.CimiteriRoute(db,r)
 	r.GET("/ws", sockets.WebSocketHandler)
 
 	port := os.Getenv("PORT_BACKEND")

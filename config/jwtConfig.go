@@ -26,8 +26,12 @@ func CreateToken(id int, email string) (string, string, error) {
 			"exp":   time.Now().Add(time.Hour * 2).Unix(),
 		})
 
-	accessString, er := access.SignedString([]byte("go-secret-8nao4^v267!oztl%io6-bneu#27!111qu(nim$&er3r&0n55t4"))
-	refreshString, err := refresh.SignedString([]byte("go-secret-8nao4^v267!oztl%io6-bneu#27!111qu(nim$&er3r&0n55t4"))
+	accessString, er := access.SignedString(
+		[]byte("go-secret-8nao4^v267!oztl%io6-bneu#27!111qu(nim$&er3r&0n55t4"),
+	)
+	refreshString, err := refresh.SignedString(
+		[]byte("go-secret-8nao4^v267!oztl%io6-bneu#27!111qu(nim$&er3r&0n55t4"),
+	)
 	if er != nil {
 		return "Invalid to create token", "access", er
 	}
