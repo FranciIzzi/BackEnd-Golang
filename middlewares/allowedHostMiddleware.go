@@ -1,11 +1,11 @@
 package middlewares
 
 import (
-	"net/http"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-var allowedHosts = []string{"localhost:8000", "MyHub.it"}
+var allowedHosts = []string{"localhost:8000", "gesthub.it"}
 
 func AllowedHostsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -17,11 +17,12 @@ func AllowedHostsMiddleware() gin.HandlerFunc {
 				break
 			}
 		}
-		
+
 		if !bool {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denided"})
 			return
 		}
 
-		c.Next()	}
+		c.Next()
+	}
 }

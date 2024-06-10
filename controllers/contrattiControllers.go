@@ -13,32 +13,28 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
+func CreateContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input handlers.InumazioniRequest
+		var input handlers.ContrattiRequest
 		if err := c.ShouldBind(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if err := handlers.ValidateInumazioniRequest(db, &input); err != nil {
+		if err := handlers.ValidateContrattiRequest(db, &input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		var inumazione models.InumazioniModel
-		inumazione = models.InumazioniModel{
-			CimiteroID:      *input.CimiteroID,
-			Settore:         *input.Settore,
-			CoordinataX:     *input.CoordinataX,
-			CoordinataY:     *input.CoordinataY,
-			NumeroCippo:     *input.NumeroCippo,
-			ParcelNumber:    *input.ParcelNumber,
-			StatoInumazione: *input.StatoInumazione,
-			Occupato:        *input.Occupato,
-			Tipologia:       *input.Tipologia,
+		var contratto models.ContrattiModel
+		contratto = models.ContrattiModel{
+      DefuntoID: *input.DefuntoID ,	
+      InizioContratto: *input.InizioContratto,	
+      FineContratto: *input.FineContratto,
+      StatoContratto: *input.StatoContratto,	
+      TipoContratto: *input.TipoContratto,
 		}
-		file, err := c.FormFile("foto")
+		file, err := c.FormFile("file")
 		if err == nil {
-			baseDir := filepath.Join("media", "inumazioni", "foto")
+			baseDir := filepath.Join("media", "contratti", "file")
 			originalFilePath := filepath.Join(baseDir, filepath.Base(file.Filename))
 			filePath := originalFilePath
 			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
@@ -57,9 +53,9 @@ func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 				)
 				return
 			}
-			inumazione.Foto = &filePath
+      contratto.File = &filePath
 		}
-		if err := db.Create(&inumazione).Error; err != nil {
+		if err := db.Create(&contratto).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -68,9 +64,9 @@ func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func GetInumazioni(db *gorm.DB) gin.HandlerFunc {
+func GetContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var inumazioni []models.InumazioniModel
+		var contratti []models.ContrattiModel
 		query := db
 
 		if idStr := c.Query("id"); idStr != "" {
@@ -86,33 +82,34 @@ func GetInumazioni(db *gorm.DB) gin.HandlerFunc {
       return
 		}
 
-		if cimitero := c.Query("cimitero"); cimitero != "" {
-			query = query.Where("cimitero_id = ?", cimitero)
+		if defunto := c.Query("defunto"); defunto != "" {
+			query = query.Where("defunto_id = ?", defunto)
 		}
-		if occupied := c.Query("occupied"); occupied != "" {
-			occupiedBool, err := strconv.ParseBool(occupied)
-			if err == nil {
-				query = query.Where("occupato = ?", occupiedBool)
-			}
-      c.JSON(http.StatusBadRequest, gin.H{"error": "Occupato ha un valore non valido"})
-      return
+		if inizioContratto := c.Query("inizio"); inizioContratto != "" {
+			query = query.Where("inizio_contratto = ?", inizioContratto)
 		}
-		if tipologia := c.Query("tipologia"); tipologia != "" {
-			query = query.Where("tipologia = ?", tipologia)
-		}
-		if err := query.Find(&inumazioni).Error; err != nil {
+    if finContratto := c.Query("fine"); finContratto != "" {
+      query = query.Where("fine_contratto = ?", finContratto)
+    }
+    if stato := c.Query("statoContratto"); stato != "" {
+      query = query.Where("stato_contratto = ?", stato)
+    }
+    if tipologia := c.Query("tipoContratto"); tipologia != "" {
+      query = query.Where("tipo_contratto = ?", tipologia)
+    }
+		if err := query.Find(&contratti).Error; err != nil {
 			c.JSON(
 				http.StatusInternalServerError,
-				gin.H{"error": "Errore nel recupero delle inumazioni"},
+				gin.H{"error": "Errore nel recupero dei contratti"},
 			)
 			return
 		}
-		c.JSON(http.StatusOK, inumazioni)
+		c.JSON(http.StatusOK, contratti)
     return
 	}
 }
 
-func DeleteInumazioni(db *gorm.DB) gin.HandlerFunc {
+func DeleteContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idStr := c.Param("id")
 
@@ -132,24 +129,25 @@ func DeleteInumazioni(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var inumazione models.InumazioniModel
-		if err := db.Where("id = ?", id).First(&inumazione).Error; err != nil {
+		var contratto models.ContrattiModel
+		if err := db.Where("id = ?", id).First(&contratto).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Inumazione non trovata"})
+				c.JSON(http.StatusNotFound, gin.H{"error": "Contratto non trovata"})
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			}
 			return
 		}
-		if err := db.Delete(&inumazione).Error; err != nil {
+		if err := db.Delete(&contratto).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Inumazione eliminata con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Contratto eliminata con successo"})
 	}
 }
 
-func UpdateInumazioni(db *gorm.DB) gin.HandlerFunc {
+func UpdateContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 	}
 }
+

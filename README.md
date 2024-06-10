@@ -1,2 +1,6 @@
+## GraveHub
+
 # BackEnd-Golang
-A demo backend project developed just to learn Golang
+Demo backend for [GraveHub]
+
+Developed by: [h3ad5h0t]

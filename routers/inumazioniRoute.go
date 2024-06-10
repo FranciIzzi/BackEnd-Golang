@@ -14,4 +14,3 @@ func InumazioniRoute(db *gorm.DB,router *gin.Engine) {
 	userGroup.DELETE("/delete/:id", controller.DeleteInumazioni(db))
 	userGroup.PUT("/put/:id", controller.UpdateInumazioni(db))
 }
-

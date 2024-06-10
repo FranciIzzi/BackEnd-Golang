@@ -3,9 +3,8 @@ package controllers
 import (
 	"net/http"
 	"root/config"
-	"root/functions"
+  "root/validators"
 	"root/models"
-	"root/validators"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -97,7 +96,7 @@ func ForgetPassword(c *gin.Context) {
 		return
 	}
 
-	if err := functions.SendWelcomeEmail(user.Email, refresh); err != nil {
+	if err := validators.SendWelcomeEmail(user.Email, refresh); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Errore nell'invio dell'email"})
 		return
 	  }

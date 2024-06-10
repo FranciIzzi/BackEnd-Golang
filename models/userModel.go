@@ -22,8 +22,3 @@ func IsValidPermessi(permesso string) bool {
 	}
 	return false
 }
-
-// `foreignKey:<chiave>: Specifica la chiave esterna per una relazione.
-// `references:<colonna>: Indica la colonna referenziata in una chiave esterna.
-// `many2many:<nome_tabella>: Specifica una relazione molti-a-molti tramite una tabella join.
-// `preload: Indica di caricare anticipatamente la relazione in una query.

@@ -6,12 +6,12 @@ import (
 
 type AventiDirittiModel struct {
 	gorm.Model
-	DefuntoID     uint   `json:"defunto"       gorm:"column:defunto_id;type:int;not null;unique"`
-	Nome          string `json:"nome"          gorm:"type:varchar(50)"`
-	Cognome       string `json:"cognome"       gorm:"type:varchar(50)"`
-	CodiceFiscale string `json:"codiceFiscale" gorm:"type:varchar(16)"` //can be null
-	Email         string `json:"email"         gorm:"type:varchar(50)"` //can be null
-	Telefono      int    `json:"telefono"      gorm:"type:int"`         //can be null
+	DefuntoID     uint    `json:"defunto"       gorm:"column:defunto_id;type:int;not null;unique"`
+	Nome          string  `json:"nome"          gorm:"column:nome;type:varchar(50);not null"`
+	Cognome       string  `json:"cognome"       gorm:"column:cognome;type:varchar(50);not null"`
+	CodiceFiscale *string `json:"codiceFiscale" gorm:"column:codice_fiscale;type:varchar(16)"`
+	Email         *string `json:"email"         gorm:"column:email;type:varchar(50)"`
+	Telefono      *int    `json:"telefono"      gorm:"column:telefono;type:int"`
 }
 
 func (AventiDirittiModel) TableName() string {
