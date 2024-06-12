@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,9 +16,13 @@ import (
 
 func CreateContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		real_body := c.PostForm("contratto")
 		var input handlers.ContrattiRequest
-		if err := c.ShouldBind(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err := json.Unmarshal([]byte(real_body), &input); err != nil {
+			c.JSON(http.StatusBadRequest,
+				gin.H{
+					"error": "Errore nel parsing JSON: " + err.Error(),
+				})
 			return
 		}
 		if err := handlers.ValidateContrattiRequest(db, &input); err != nil {
@@ -26,12 +31,13 @@ func CreateContratti(db *gorm.DB) gin.HandlerFunc {
 		}
 		var contratto models.ContrattiModel
 		contratto = models.ContrattiModel{
-      DefuntoID: *input.DefuntoID ,	
-      InizioContratto: *input.InizioContratto,	
-      FineContratto: *input.FineContratto,
-      StatoContratto: *input.StatoContratto,	
-      TipoContratto: *input.TipoContratto,
+			DefuntoID:       *input.DefuntoID,
+			InizioContratto: *input.InizioContratto,
+			FineContratto:   *input.FineContratto,
+			StatoContratto:  *input.StatoContratto,
+			TipoContratto:   *input.TipoContratto,
 		}
+
 		file, err := c.FormFile("file")
 		if err == nil {
 			baseDir := filepath.Join("media", "contratti", "file")
@@ -53,13 +59,13 @@ func CreateContratti(db *gorm.DB) gin.HandlerFunc {
 				)
 				return
 			}
-      contratto.File = &filePath
+			contratto.File = &filePath
 		}
 		if err := db.Create(&contratto).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Inumazione creata con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Contratti creati con successo"})
 		return
 	}
 }
@@ -72,14 +78,17 @@ func GetContratti(db *gorm.DB) gin.HandlerFunc {
 		if idStr := c.Query("id"); idStr != "" {
 			id, err := strconv.Atoi(idStr)
 			if err == nil {
-        if id <= 0 {
-          c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve essere un numero positivo"})
-          return
-        }
+				if id <= 0 {
+					c.JSON(
+						http.StatusBadRequest,
+						gin.H{"error": "ID deve essere un numero positivo"},
+					)
+					return
+				}
 				query = query.Where("id = ?", id)
 			}
 			c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve essere un numero"})
-      return
+			return
 		}
 
 		if defunto := c.Query("defunto"); defunto != "" {
@@ -88,15 +97,15 @@ func GetContratti(db *gorm.DB) gin.HandlerFunc {
 		if inizioContratto := c.Query("inizio"); inizioContratto != "" {
 			query = query.Where("inizio_contratto = ?", inizioContratto)
 		}
-    if finContratto := c.Query("fine"); finContratto != "" {
-      query = query.Where("fine_contratto = ?", finContratto)
-    }
-    if stato := c.Query("statoContratto"); stato != "" {
-      query = query.Where("stato_contratto = ?", stato)
-    }
-    if tipologia := c.Query("tipoContratto"); tipologia != "" {
-      query = query.Where("tipo_contratto = ?", tipologia)
-    }
+		if finContratto := c.Query("fine"); finContratto != "" {
+			query = query.Where("fine_contratto = ?", finContratto)
+		}
+		if stato := c.Query("statoContratto"); stato != "" {
+			query = query.Where("stato_contratto = ?", stato)
+		}
+		if tipologia := c.Query("tipoContratto"); tipologia != "" {
+			query = query.Where("tipo_contratto = ?", tipologia)
+		}
 		if err := query.Find(&contratti).Error; err != nil {
 			c.JSON(
 				http.StatusInternalServerError,
@@ -105,7 +114,7 @@ func GetContratti(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, contratti)
-    return
+		return
 	}
 }
 
@@ -150,4 +159,3 @@ func UpdateContratti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 	}
 }
-

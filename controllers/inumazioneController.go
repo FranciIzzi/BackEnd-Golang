@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	// "bytes"
+	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,15 +12,23 @@ import (
 	"strconv"
 	"time"
 
+	// "io"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		real_body := c.PostForm("inumazione")
+    log.Println(real_body)
 		var input handlers.InumazioniRequest
-		if err := c.ShouldBind(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err := json.Unmarshal([]byte(real_body), &input); err != nil {
+			c.JSON(http.StatusBadRequest, 
+        gin.H{
+          "error": "Errore nel parsing JSON: " + err.Error(),
+          "body": real_body,
+        })
 			return
 		}
 		if err := handlers.ValidateInumazioniRequest(db, &input); err != nil {
@@ -36,6 +47,7 @@ func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 			Occupato:        *input.Occupato,
 			Tipologia:       *input.Tipologia,
 		}
+
 		file, err := c.FormFile("foto")
 		if err == nil {
 			baseDir := filepath.Join("media", "inumazioni", "foto")
@@ -63,7 +75,7 @@ func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Inumazione creata con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Inumazione creata con successo", "id": inumazione.ID})
 		return
 	}
 }
@@ -74,16 +86,21 @@ func GetInumazioni(db *gorm.DB) gin.HandlerFunc {
 		query := db
 
 		if idStr := c.Query("id"); idStr != "" {
+			log.Println("ID:", idStr)
 			id, err := strconv.Atoi(idStr)
 			if err == nil {
-        if id <= 0 {
-          c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve essere un numero positivo"})
-          return
-        }
+				if id <= 0 {
+					c.JSON(
+						http.StatusBadRequest,
+						gin.H{"error": "ID deve essere un numero positivo"},
+					)
+					return
+				}
 				query = query.Where("id = ?", id)
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve essere un numero"})
+				return
 			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ID deve essere un numero"})
-      return
 		}
 
 		if cimitero := c.Query("cimitero"); cimitero != "" {
@@ -94,8 +111,8 @@ func GetInumazioni(db *gorm.DB) gin.HandlerFunc {
 			if err == nil {
 				query = query.Where("occupato = ?", occupiedBool)
 			}
-      c.JSON(http.StatusBadRequest, gin.H{"error": "Occupato ha un valore non valido"})
-      return
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Occupato ha un valore non valido"})
+			return
 		}
 		if tipologia := c.Query("tipologia"); tipologia != "" {
 			query = query.Where("tipologia = ?", tipologia)
@@ -108,7 +125,7 @@ func GetInumazioni(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, inumazioni)
-    return
+		return
 	}
 }
 

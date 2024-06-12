@@ -5,7 +5,13 @@ import (
 	"net/http"
 )
 
-var allowedHosts = []string{"localhost:8000", "gesthub.it"}
+var allowedHosts = []string{
+	"http://localhost:8000",
+	"http://0.0.0.0:8000",
+	"http://127.0.0.1:8000",
+	"http://192.168.1.9:8000",
+	"http://192.168.1.18:8000",
+}
 
 func AllowedHostsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

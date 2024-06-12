@@ -7,8 +7,9 @@ import (
 	"time"
 )
 
-//  Data e Time di riferimento 2024-06-10T14:30
+// Data e Time di riferimento 2024-06-10T14:30:00.000Z
 func ValidateDateTime(dateTime string) (bool, error) {
+	print("errore:\n")
 	path := strings.Split(dateTime, "T")
 	if len(path) != 2 {
 		return false, errors.New("Formato della data non valida")
@@ -30,9 +31,6 @@ func ValidateDateTime(dateTime string) (bool, error) {
 		return false, errors.New("Il giorno inserito non è valido")
 	}
 	timeParts := strings.Split(path[1], ":")
-	if len(timeParts) != 2 {
-		return false, errors.New("formato non valido, l'orario non è valido")
-	}
 	hour, err := strconv.Atoi(timeParts[0])
 	if err != nil || hour < 0 || hour > 23 {
 		return false, errors.New("l'ora inserita non è valida")
@@ -45,10 +43,12 @@ func ValidateDateTime(dateTime string) (bool, error) {
 	return true, nil
 }
 
-// Data di riferimento 2024-06-10
+// Arriva questo 2024-06-10T14:30:00.000Z
+// Data di riferimento da storare questa 2024-06-10
 func ValidateDate(date string) (bool, error) {
-	path := strings.Split(date, "-")
-	if len(date) != 3 {
+	deficit := strings.Split(date, "T")
+	path := strings.Split(deficit[0], "-")
+	if len(path) != 3 {
 		return false, errors.New("Formato non valido, la data non è valida")
 	}
 	year, err := strconv.Atoi(path[0])
@@ -68,4 +68,14 @@ func ValidateDate(date string) (bool, error) {
 
 func daysInMonth(month, year int) int {
 	return time.Date(year, time.Month(month+1), 0, 0, 0, 0, 0, time.UTC).Day()
+}
+
+func ConvertStringToDate(string *string) string {
+	convert := strings.Split(*string, "T")
+	return convert[0]
+}
+func ConvertStringToDateTime(string *string) string {
+	convert := strings.Split(*string, ":")
+	res := convert[0] + ":" + convert[1]
+	return res
 }

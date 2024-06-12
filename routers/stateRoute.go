@@ -11,4 +11,3 @@ func StateRoute(router *gin.Engine) {
 	router.POST("impact/v1/api/rest/auth/logout/", controller.Logout)
 	router.POST("impact/v1/auth/rest/api/jwt/refresh/", controller.RefreshToken)
 }
-

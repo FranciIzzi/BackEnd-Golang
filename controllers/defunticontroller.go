@@ -1,10 +1,14 @@
 package controllers
 
 import (
+	"bytes"
+	"log"
 	"net/http"
 	"root/handlers"
 	"root/models"
 	"strconv"
+
+	"io"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +16,19 @@ import (
 
 func CreateDefunto(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		bodyBytes, err := io.ReadAll(io.Reader(c.Request.Body))
+		if err != nil {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Errore nella lettura della richiesta: " + err.Error()},
+			)
+			return
+		}
+		bodyString := string(bodyBytes)
+		log.Println("Corpo della richiesta:", bodyString)
+
+		c.Request.Body = io.NopCloser(io.Reader(bytes.NewBuffer(bodyBytes)))
+
 		var input handlers.DefuntiRequest
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -38,7 +55,7 @@ func CreateDefunto(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Defunto creato con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Defunto creato con successo", "id": defunto.ID})
 		return
 	}
 

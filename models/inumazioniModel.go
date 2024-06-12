@@ -18,7 +18,6 @@ type InumazioniModel struct {
 	Foto            *string      `json:"foto"            gorm:"column:foto;type:varchar(255);"`
 	Defunto         DefuntiModel `                       gorm:"foreignKey:InumazioneID;constraint:OnDelete:CASCADE;"`
 }
-
 func (InumazioniModel) TableName() string {
 	return "inumazioni"
 }

@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"bytes"
+	"io"
+	"log"
 	"net/http"
 	"root/handlers"
 	"root/models"
@@ -12,7 +15,19 @@ import (
 
 func CreateAventiDiritti(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input handlers.AventiDirittiRequest
+		log.Println("URL:", c.Request.URL.Path)
+		bodyBytes, err := io.ReadAll(io.Reader(c.Request.Body))
+		if err != nil {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Errore nella lettura del body: " + err.Error()},
+			)
+			return
+		}
+		c.Request.Body = io.NopCloser(io.Reader(bytes.NewBuffer(bodyBytes)))
+		log.Println("Corpo della richiesta:", string(bodyBytes))
+
+		var input []handlers.AventiDirittiRequest
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -21,23 +36,24 @@ func CreateAventiDiritti(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		var aventiDiritti models.AventiDirittiModel
-		aventiDiritti = models.AventiDirittiModel{
-			DefuntoID:     *input.DefuntoID,
-			Nome:          *input.Nome,
-			Cognome:       *input.Cognome,
-			CodiceFiscale: input.CodiceFiscale,
-			Email:         input.Email,
-			Telefono:      input.Telefono,
+		for _, instance := range input {
+			var aventiDiritti models.AventiDirittiModel
+			aventiDiritti = models.AventiDirittiModel{
+				DefuntoID:     *instance.DefuntoID,
+				Nome:          *instance.Nome,
+				Cognome:       *instance.Cognome,
+				CodiceFiscale: instance.CodiceFiscale,
+				Email:         instance.Email,
+				Telefono:      instance.Telefono,
+			}
+			if err := db.Create(&aventiDiritti).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 		}
-		if err := db.Create(&aventiDiritti).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "Aventi Diritti creato con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Tutti gli aventi diritti creati con successo"})
 		return
 	}
-
 }
 
 func GetAventiDiritti(db *gorm.DB) gin.HandlerFunc {
@@ -166,7 +182,8 @@ func UpdateAventiDiritti(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if err := handlers.ValidateAventiDirittirequest(db, &input); err != nil {
+		list := []handlers.AventiDirittiRequest{input}
+		if err := handlers.ValidateAventiDirittirequest(db, &list); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

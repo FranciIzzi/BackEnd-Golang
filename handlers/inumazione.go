@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"errors"
-	"root/models"
+	// "root/models"
 
 	"gorm.io/gorm"
 )
 
 type InumazioniRequest struct {
-	gorm.Model
+  gorm.Model
 	CimiteroID      *uint   `json:"cimitero"`
 	Settore         *string `json:"settore"`
 	CoordinataX     *int    `json:"x"`
@@ -28,32 +28,32 @@ func ValidateInumazioniRequest(db *gorm.DB, req *InumazioniRequest) error {
 	if *req.CimiteroID < 1 {
 		return errors.New("CimiteroID non valido")
 	}
-	var cimitero models.CimiteriModel
-	var err error
-	if err = db.Where("id = ?", req.CimiteroID).First(&cimitero).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return errors.New("Cimitero non trovato")
-		}
-		return errors.New("Errore Interno al Server")
-	}
-	var settoriDetected = cimitero.Settori
+	// var cimitero models.CimiteriModel
+	// var err error
+	// if err = db.Where("id = ?", req.CimiteroID).First(&cimitero).Error; err != nil {
+	// 	if err == gorm.ErrRecordNotFound {
+	// 		return errors.New("Cimitero non trovato")
+	// 	}
+	//    return errors.New("Errore Interno al Server: " + err.Error())
+	// }
+	// var settoriDetected = cimitero.Settori
 	if req.Settore == nil {
 		return errors.New("Settore deve essere obbligatorio")
 	}
-	if req.Settore != nil && !DetectSettore(settoriDetected, *req.Settore) {
-		return errors.New("Settore non presente nel cimitero inserito")
-	}
+	// if req.Settore != nil && !DetectSettore(settoriDetected, *req.Settore) {
+	// 	return errors.New("Settore non presente nel cimitero inserito")
+	// }
 	if req.CoordinataX == nil {
 		return errors.New("X deve essere obbligatorio")
 	}
-	if *req.CoordinataX < 1 {
-		return errors.New("X deve essere un intero positivo")
+	if *req.CoordinataX < 0 {
+		return errors.New("X non può essere un intero negativo")
 	}
 	if req.CoordinataY == nil {
 		return errors.New("Y deve essere obbligatorio")
 	}
-	if *req.CoordinataY < 1 {
-		return errors.New("Y deve essere un intero positivo")
+	if *req.CoordinataY < 0 {
+		return errors.New("Y non può essere un intero negativo")
 	}
 	if req.Occupato == nil {
 		return errors.New("Occupato deve essere obbligatorio")

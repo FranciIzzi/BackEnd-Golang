@@ -94,7 +94,7 @@ var regioni_province_comuni = map[string]map[string][]string{
 		"L'Aquila": {"L'Aquila", "Avezzano", "Sulmona"},
 		"Teramo":   {"Teramo", "Giulianova", "Roseto degli Abruzzi"},
 		"Pescara":  {"Pescara", "Montesilvano", "Spoltore"},
-		"Chieti":   {"Chieti", "Vasto", "Lanciano"},
+		"Chieti":   {"Chieti", "Vasto", "Lanciano","I148 - San Salvo"},
 	},
 	"Molise": {
 		"Campobasso": {"Campobasso", "Termoli", "Bojano"},

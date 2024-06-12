@@ -6,7 +6,7 @@ import (
 
 type ContrattiModel struct {
 	gorm.Model
-	DefuntoID       uint   `json:"defunto"        gorm:"column:defunto_id;type:int;not null;unique"`
+	DefuntoID       uint   `json:"defunto"        gorm:"column:defunto_id;type:int;not null"`
 	InizioContratto string `json:"inizio"         gorm:"column:inizio_contratto;type:varchar(25);not null;"`
 	FineContratto   string `json:"fine"           gorm:"column:fine_contratto;type:varchar(25);not null;"`
 	File            *string `json:"file"           gorm:"column:file;type:varchar(255);"`

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"root/models"
 	"root/validators"
 
@@ -50,34 +51,39 @@ func ValidateDefuntiRequest(db *gorm.DB, req *DefuntiRequest) error {
 	if req.Sesso != nil && !validateSesso(*req.Sesso) {
 		return errors.New("Sesso non valido")
 	}
-  if req.LuogoNascita == nil {
-    return errors.New("Luogo di nascita deve essere obbligatorio")
-  }
-  if req.MalattiaInfettiva == nil {
-    return errors.New("Inserire se si trattava di morte per malattia infettiva")
-  }
-  if req.DataNascita == nil {
-    return errors.New("Data di nascita deve essere obbligatorio")
-  }
-  validateData, err := validators.ValidateDate(*req.DataNascita)
-  if !validateData {
-    return err
-  }
-  if req.DataOraMorte == nil {
-    return errors.New("Data di morte deve essere obbligatorio")
-  }
-  validateData1, err1 := validators.ValidateDateTime(*req.DataOraMorte)
-  if !validateData1 {
-    return err1
-  }
-  if req.DataOraSepoltura == nil {
-    return errors.New("Data di sepoltura deve essere obbligatorio")
-  } 
-  validateData2, err2 := validators.ValidateDateTime(*req.DataOraSepoltura)
-  if !validateData2 {
-    return err2
-  }
-  return nil
+	if req.LuogoNascita == nil {
+		return errors.New("Luogo di nascita deve essere obbligatorio")
+	}
+	if req.MalattiaInfettiva == nil {
+		req.MalattiaInfettiva = new(bool)
+		*req.MalattiaInfettiva = false
+	}
+	if req.DataNascita == nil {
+		return errors.New("Data di nascita deve essere obbligatorio")
+	}
+	validateData, err := validators.ValidateDate(*req.DataNascita)
+	if !validateData {
+		return err
+	}
+	*req.DataNascita = validators.ConvertStringToDate(req.DataNascita)
+	if req.DataOraMorte == nil {
+		return errors.New("Data di morte deve essere obbligatorio")
+	}
+	log.Print("ecco la data :" + *req.DataOraMorte)
+	validateData1, err1 := validators.ValidateDateTime(*req.DataOraMorte)
+	if !validateData1 {
+		return err1
+	}
+	*req.DataOraMorte = validators.ConvertStringToDateTime(req.DataOraMorte)
+	if req.DataOraSepoltura == nil {
+		return errors.New("Data di sepoltura deve essere obbligatorio")
+	}
+	validateData2, err2 := validators.ValidateDateTime(*req.DataOraSepoltura)
+	if !validateData2 {
+		return err2
+	}
+	*req.DataOraSepoltura = validators.ConvertStringToDateTime(req.DataOraSepoltura)
+	return nil
 }
 
 var sessoList = []string{"M", "F", "Altro"}
