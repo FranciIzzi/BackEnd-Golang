@@ -13,7 +13,7 @@ func CreateToken(id int, email string) (string, string, error) {
 			"type":  "access",
 			"id":    id,
 			"email": email,
-			"role":  "h3ad5h0t",
+			"role":  "gravehub_v0",
 			"exp":   time.Now().Add(time.Minute * 30).Unix(),
 		})
 
@@ -22,7 +22,7 @@ func CreateToken(id int, email string) (string, string, error) {
 			"type":  "refresh",
 			"id":    id,
 			"email": email,
-			"role":  "h3ad5h0t",
+			"role":  "gravehub_v0",
 			"exp":   time.Now().Add(time.Hour * 2).Unix(),
 		})
 

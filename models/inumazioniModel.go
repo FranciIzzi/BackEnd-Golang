@@ -6,8 +6,7 @@ import (
 
 type InumazioniModel struct {
 	gorm.Model
-	CimiteroID      uint         `json:"cimitero"        gorm:"column:cimitero_id;type:int;not null"`
-	Settore         string       `json:"settore"         gorm:"column:settore;type:varchar(25);not null;"`
+	SettoreID       uint         `json:"settore"         gorm:"column:settore_id;type:int;not null"`
 	CoordinataX     int          `json:"x"               gorm:"column:coordinata_x;type:int;not null;"`
 	CoordinataY     int          `json:"y"               gorm:"column:coordinata_y;type:int;not null;"`
 	NumeroCippo     int          `json:"numeroCippo"     gorm:"column:numero_cippo;type:int;not null;"`
@@ -18,6 +17,7 @@ type InumazioniModel struct {
 	Foto            *string      `json:"foto"            gorm:"column:foto;type:varchar(255);"`
 	Defunto         DefuntiModel `                       gorm:"foreignKey:InumazioneID;constraint:OnDelete:CASCADE;"`
 }
+
 func (InumazioniModel) TableName() string {
 	return "inumazioni"
 }

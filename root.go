@@ -27,6 +27,7 @@ func main() {
 	}
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.CimiteriModel{})
+	db.AutoMigrate(&models.SettoriModel{})
 	db.AutoMigrate(&models.InumazioniModel{})
 	db.AutoMigrate(&models.DefuntiModel{})
 	db.AutoMigrate(&models.ContrattiModel{})
@@ -55,6 +56,7 @@ func main() {
 	routes.UserRoute(r)
 	routes.StateRoute(r)
 	routes.CimiteriRoute(db, r)
+	routes.SettoriRoute(db, r)
 	routes.InumazioniRoute(db, r)
 	routes.DefuntiRoute(db, r)
 	routes.ServiceRoute(db, r)

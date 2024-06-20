@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	// "bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 	"strconv"
 	"time"
 
-	// "io"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -37,8 +35,7 @@ func CreateInumazioni(db *gorm.DB) gin.HandlerFunc {
 		}
 		var inumazione models.InumazioniModel
 		inumazione = models.InumazioniModel{
-			CimiteroID:      *input.CimiteroID,
-			Settore:         *input.Settore,
+			SettoreID:      *input.SettoreID,
 			CoordinataX:     *input.CoordinataX,
 			CoordinataY:     *input.CoordinataY,
 			NumeroCippo:     *input.NumeroCippo,

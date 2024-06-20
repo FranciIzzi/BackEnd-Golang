@@ -1,10 +1,17 @@
 package controllers
 
 import (
+	// "bytes"
+	"encoding/json"
+	// "io"
+	// "log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"root/handlers"
 	"root/models"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -102,34 +109,60 @@ func DeleteCimitero(db *gorm.DB) gin.HandlerFunc {
 
 func CreateCimitero(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-    var input handlers.CimiteriRequest
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		real_body := c.PostForm("cimitero")
+		var input handlers.CimiteriRequest
+		if err := json.Unmarshal([]byte(real_body), &input); err != nil {
+			c.JSON(http.StatusBadRequest,
+				gin.H{
+					"error": "Errore nel parsing JSON: " + err.Error(),
+				})
 			return
 		}
 		if err := handlers.ValidateCimiteriRequest(db, &input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		cimitero := models.CimiteriModel{
+    var cimitero models.CimiteriModel
+		cimitero = models.CimiteriModel{
 			Latitudine:          *input.Latitudine,
 			Longitudine:         *input.Longitudine,
 			Regione:             *input.Regione,
 			Provincia:           *input.Provincia,
 			Comune:              *input.Comune,
-      Settori:             *input.Settori,
 			PostiTotali:         *input.PostiTotali,
 			InumazioniPresenti:  *input.InumazioniPresenti,
 			RotazioneEsumazioni: *input.RotazioneEsumazioni,
 		}
 
+		file, err := c.FormFile("planimetria")
+		if err == nil {
+			baseDir := filepath.Join("media", "cimiteri", "planimetrie")
+			originalFilePath := filepath.Join(baseDir, filepath.Base(file.Filename))
+			filePath := originalFilePath
+			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
+				extension := filepath.Ext(file.Filename)
+				fileNameWithoutExt := file.Filename[:len(file.Filename)-len(extension)]
+				newFileName := fileNameWithoutExt + "_" + time.Now().
+					Format("20060102-150405") +
+					extension
+				filePath = filepath.Join(baseDir, newFileName)
+			}
+
+			if err := c.SaveUploadedFile(file, filePath); err != nil {
+				c.JSON(
+					http.StatusInternalServerError,
+					gin.H{"error": "Impossibile salvare il file: " + err.Error()},
+				)
+				return
+			}
+			cimitero.Planimetria = filePath
+		}
 		if err := db.Create(&cimitero).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Cimitero creato con successo"})
+		c.JSON(http.StatusOK, gin.H{"message": "Cimitero creato con successo", "cimitero": cimitero.ID})
 		return
 	}
 }

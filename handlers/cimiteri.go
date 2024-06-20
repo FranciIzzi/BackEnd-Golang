@@ -14,7 +14,6 @@ type CimiteriRequest struct {
 	Regione             *string   `json:"regione"`
 	Provincia           *string   `json:"provincia"`
 	Comune              *string   `json:"comune"`
-	Settori             *[]string `json:"settori"`
 	PostiTotali         *int      `json:"postiTotali"`
 	InumazioniPresenti  *int      `json:"inumazioniPresenti"`
 	RotazioneEsumazioni *int      `json:"rotazioneEsumazioniAnni"`
@@ -44,13 +43,6 @@ func ValidateCimiteriRequest(db *gorm.DB, req *CimiteriRequest) error {
 	if err != nil && result == false {
 		return err
 	}
-  if req.Settori == nil {
-    return errors.New("La lista settori deve essere obbligatorio")
-  }
-  if req.Settori != nil && len(*req.Settori) == 0 {
-    return errors.New("Il campo settori deve essere composto da almeno un elemento")
-  }
-  // TODO: validate settori in maniera rigorosa 
 	if req.InumazioniPresenti != nil && *req.InumazioniPresenti < 0 {
 		return errors.New("Le inumazioni presenti non possono essere negative")
 	}

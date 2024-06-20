@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"root/models"
 	// "root/models"
 
 	"gorm.io/gorm"
@@ -9,8 +10,7 @@ import (
 
 type InumazioniRequest struct {
   gorm.Model
-	CimiteroID      *uint   `json:"cimitero"`
-	Settore         *string `json:"settore"`
+	SettoreID       *uint   `json:"settore"`
 	CoordinataX     *int    `json:"x"`
 	CoordinataY     *int    `json:"y"`
 	NumeroCippo     *int    `json:"numeroCippo"`
@@ -22,27 +22,20 @@ type InumazioniRequest struct {
 
 func ValidateInumazioniRequest(db *gorm.DB, req *InumazioniRequest) error {
 
-	if req.CimiteroID == nil {
-		return errors.New("CimiteroID deve essere obbligatorio")
+	if req.SettoreID == nil {
+		return errors.New("SettoreID deve essere obbligatorio")
 	}
-	if *req.CimiteroID < 1 {
+	if *req.SettoreID < 1 {
 		return errors.New("CimiteroID non valido")
 	}
-	// var cimitero models.CimiteriModel
-	// var err error
-	// if err = db.Where("id = ?", req.CimiteroID).First(&cimitero).Error; err != nil {
-	// 	if err == gorm.ErrRecordNotFound {
-	// 		return errors.New("Cimitero non trovato")
-	// 	}
-	//    return errors.New("Errore Interno al Server: " + err.Error())
-	// }
-	// var settoriDetected = cimitero.Settori
-	if req.Settore == nil {
-		return errors.New("Settore deve essere obbligatorio")
+	var settore models.SettoriModel
+  var err error
+	if err = db.Where("id = ?", req.SettoreID).First(&settore).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("Settore non trovato")
+		}
+	   return errors.New("Errore Interno al Server: " + err.Error())
 	}
-	// if req.Settore != nil && !DetectSettore(settoriDetected, *req.Settore) {
-	// 	return errors.New("Settore non presente nel cimitero inserito")
-	// }
 	if req.CoordinataX == nil {
 		return errors.New("X deve essere obbligatorio")
 	}
@@ -74,14 +67,6 @@ func ValidateInumazioniRequest(db *gorm.DB, req *InumazioniRequest) error {
 	return nil
 }
 
-func DetectSettore(settori []string, settore string) bool {
-	for _, set := range settori {
-		if set == settore {
-			return true
-		}
-	}
-	return false
-}
 
 func checkValue(list []string, value string) bool {
 	for _, x := range list {
