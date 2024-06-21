@@ -16,6 +16,7 @@ import (
 
 func GetCimiteri(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		var err error
 
 		idStr := c.Query("id")
@@ -53,9 +54,7 @@ func GetCimiteri(db *gorm.DB) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-      
-      // c.Request.Header.Add("Content-Type", "application/json")
-      // c.Request.Header.Add("Access-Control-Allow-Origin", "*")
+
 			c.JSON(http.StatusOK, cimiteri)
 			return
 		}

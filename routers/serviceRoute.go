@@ -10,4 +10,5 @@ import (
 func ServiceRoute(db *gorm.DB, router *gin.Engine) {
 	userGroup := router.Group("server/api/service/method")
 	userGroup.GET("/ricerca/get", controller.GetRicerca(db))
+	userGroup.GET("/file/get", controller.GetFile(db))
 }

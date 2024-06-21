@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"root/config"
 
@@ -35,13 +37,14 @@ func main() {
 	db.AutoMigrate(&models.AventiDirittiModel{})
 
 	r := gin.Default()
-	r.Static("/media", "media")
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders: []string{
+			"Origin",
 			"Content-Type",
 			"Authorization",
+			"Access-Control-Allow-Origin",
 		},
 		ExposeHeaders: []string{
 			"Content-Length",
@@ -53,6 +56,7 @@ func main() {
 		MaxAge: 6 * time.Hour,
 	}))
 
+	r.Static("/media", "media")
 
 	routes.UserRoute(r)
 	routes.StateRoute(r)
@@ -64,6 +68,19 @@ func main() {
 	routes.ContrattiRoute(db, r)
 	routes.AventiDirittiRoute(db, r)
 	r.GET("/ws", sockets.WebSocketHandler)
+	r.GET("/test", func(c *gin.Context) {
+		imagePath := c.Query("path")
+		file, err := os.Open(imagePath)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to open image file")
+			return
+		}
+		defer file.Close()
+
+		c.Writer.Header().Set("Content-Type", "image/png")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		io.Copy(c.Writer, file)
+	})
 
 	port := os.Getenv("PORT_backend")
 	if port == "" {

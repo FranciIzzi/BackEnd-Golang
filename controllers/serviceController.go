@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetFile(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+	}
+}
+
 func GetRicerca(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var listInumazioni []models.InumazioniModel

@@ -32,6 +32,7 @@ func CreateSettori(db *gorm.DB) gin.HandlerFunc {
 		}
 		var settore models.SettoriModel
 		settore = models.SettoriModel{
+			Model:             gorm.Model{},
 			CimiteroID:        *input.CimiteroID,
 			Nome:              *input.Nome,
 			Righe:             *input.Righe,
@@ -39,6 +40,7 @@ func CreateSettori(db *gorm.DB) gin.HandlerFunc {
 			InumazioniSettore: *input.InumazioniSettore,
 			PuntiCanvas:       *input.PuntiCanvas,
 			Color:             *input.Color,
+			Inumazioni:        []models.InumazioniModel{},
 		}
 		file, err := c.FormFile("snapshot")
 		if err == nil {
