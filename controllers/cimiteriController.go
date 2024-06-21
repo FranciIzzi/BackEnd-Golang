@@ -1,10 +1,7 @@
 package controllers
 
 import (
-	// "bytes"
 	"encoding/json"
-	// "io"
-	// "log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -19,10 +16,10 @@ import (
 
 func GetCimiteri(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var err error
+
 		idStr := c.Query("id")
 		comune := c.Query("comune")
-
-		var err error
 
 		if idStr != "" {
 			id, err := strconv.Atoi(idStr)
@@ -56,7 +53,9 @@ func GetCimiteri(db *gorm.DB) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-
+      
+      // c.Request.Header.Add("Content-Type", "application/json")
+      // c.Request.Header.Add("Access-Control-Allow-Origin", "*")
 			c.JSON(http.StatusOK, cimiteri)
 			return
 		}
@@ -122,7 +121,7 @@ func CreateCimitero(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-    var cimitero models.CimiteriModel
+		var cimitero models.CimiteriModel
 		cimitero = models.CimiteriModel{
 			Latitudine:          *input.Latitudine,
 			Longitudine:         *input.Longitudine,
@@ -162,7 +161,10 @@ func CreateCimitero(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Cimitero creato con successo", "cimitero": cimitero.ID})
+		c.JSON(
+			http.StatusOK,
+			gin.H{"message": "Cimitero creato con successo", "cimitero": cimitero.ID},
+		)
 		return
 	}
 }

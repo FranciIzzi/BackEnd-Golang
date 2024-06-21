@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"root/config"
+
 	// "root/middlewares"
 	"root/models"
 	routes "root/routers"
@@ -34,7 +35,7 @@ func main() {
 	db.AutoMigrate(&models.AventiDirittiModel{})
 
 	r := gin.Default()
-  r.Static("/media", "media")
+	r.Static("/media", "media")
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
@@ -51,7 +52,7 @@ func main() {
 		// }, SERVE SOLO PER IMPLEMENTARE UN CHECK DINAMICO SULLE ORIGIN
 		MaxAge: 6 * time.Hour,
 	}))
-	// r.Use(middlewares.AllowedHostsMiddleware())
+
 
 	routes.UserRoute(r)
 	routes.StateRoute(r)
